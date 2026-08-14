@@ -24,7 +24,6 @@
   }
   * { 
     box-sizing: border-box; 
-    /* Блокировка выделения текста */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -34,7 +33,7 @@
     background: #000;
     font-family: 'Space Grotesk', -apple-system, sans-serif;
     overscroll-behavior: none;
-    overflow: hidden; /* Отключение скроллинга всей страницы */
+    overflow: hidden;
     touch-action: manipulation;
   }
   .mono { font-family: 'JetBrains Mono', monospace; }
@@ -132,7 +131,6 @@
   .biz-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); background: rgba(212,175,106,0.1); padding: 1px 6px; border-radius: 100px; }
   .biz-income { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); margin-top: 3px; }
   
-  /* ОБНОВЛЕННЫЙ СТИЛЬ КНОПОК ПОКУПКИ */
   .biz-buy { 
     display: flex; flex-direction: column; align-items: center; gap: 2px; 
     padding: 8px 14px; border-radius: 12px; 
@@ -294,36 +292,38 @@
     e.preventDefault();
   });
 
+  // ИСПРАВЛЕННЫЕ И ОБЛЕГЧЕННЫЕ ПОРОГИ УРОВНЕЙ
   const LEVELS = [
     { name: "Rookie", threshold: 0, incomeMult: 1 },
-    { name: "Trader", threshold: 5000, incomeMult: 1.2 },
-    { name: "Broker", threshold: 50000, incomeMult: 1.5 },
-    { name: "Investor", threshold: 250000, incomeMult: 2.0 },
-    { name: "Banker", threshold: 1000000, incomeMult: 2.5 },
-    { name: "CEO", threshold: 10000000, incomeMult: 3.5 },
-    { name: "Tycoon", threshold: 50000000, incomeMult: 5.0 },
-    { name: "Shark Lord", threshold: 250000000, incomeMult: 8.0 },
+    { name: "Trader", threshold: 200, incomeMult: 1.2 },       // Достигается очень быстро!
+    { name: "Broker", threshold: 2500, incomeMult: 1.5 },
+    { name: "Investor", threshold: 25000, incomeMult: 2.0 },
+    { name: "Banker", threshold: 250000, incomeMult: 2.5 },
+    { name: "CEO", threshold: 2500000, incomeMult: 3.5 },
+    { name: "Tycoon", threshold: 25000000, incomeMult: 5.0 },
+    { name: "Shark Lord", threshold: 100000000, incomeMult: 8.0 },
   ];
 
+  // ИСПРАВЛЕННЫЕ И БОЛЕЕ ДОСТУПНЫЕ ЦЕНЫ БИЗНЕСОВ
   const BUSINESS_DATA = [
-    { id: "office", name: "Small Office", icon: "🏢", basePrice: 2500, baseIncome: 150 },
-    { id: "brokerage", name: "Brokerage", icon: "📊", basePrice: 25000, baseIncome: 1200 },
-    { id: "bank", name: "Bank", icon: "🏦", basePrice: 250000, baseIncome: 10000 },
-    { id: "tech", name: "Tech Company", icon: "💻", basePrice: 2500000, baseIncome: 85000 },
-    { id: "ai", name: "AI Corporation", icon: "🤖", basePrice: 25000000, baseIncome: 700000 },
-    { id: "space", name: "Space Company", icon: "🚀", basePrice: 250000000, baseIncome: 6000000 },
+    { id: "office", name: "Small Office", icon: "🏢", basePrice: 50, baseIncome: 30 },
+    { id: "brokerage", name: "Brokerage", icon: "📊", basePrice: 500, baseIncome: 350 },
+    { id: "bank", name: "Bank", icon: "🏦", basePrice: 5000, baseIncome: 4000 },
+    { id: "tech", name: "Tech Company", icon: "💻", basePrice: 50000, baseIncome: 45000 },
+    { id: "ai", name: "AI Corporation", icon: "🤖", basePrice: 500000, baseIncome: 500000 },
+    { id: "space", name: "Space Company", icon: "🚀", basePrice: 10000000, baseIncome: 8000000 },
   ];
 
   const ACHIEVEMENTS = [
     { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
-    { id: "starter", name: "Fast Start", desc: "Reach $1,000 SP.", check: s => s.balance >= 1000 },
+    { id: "starter", name: "Fast Start", desc: "Reach $200 SP.", check: s => s.balance >= 200 },
     { id: "first_biz", name: "First Office", desc: "Acquire your first business.", check: s => (s.owned.office || 0) >= 1 },
-    { id: "capitalist", name: "Capitalist", desc: "Reach $50,000 SP.", check: s => s.balance >= 50000 },
+    { id: "capitalist", name: "Capitalist", desc: "Reach $10,000 SP.", check: s => s.balance >= 10000 },
     { id: "mogul", name: "Business Mogul", desc: "Own 5 total businesses.", check: s => Object.values(s.owned).reduce((a, b) => a + b, 0) >= 5 },
     { id: "shark_titan", name: "Shark Titan", desc: "Reach $1,000,000 SP.", check: s => s.balance >= 1000000 },
   ];
 
-  const SAVE_KEY = "shark_game_save_v2";
+  const SAVE_KEY = "shark_game_save_v5";
   const MAX_ENERGY = 1000;
 
   let tgUser = null;
@@ -360,7 +360,7 @@
     return Math.floor(Math.random() * (10000 - 2 + 1)) + 2;
   }
 
-  const PROFILE_VERSION = 4;
+  const PROFILE_VERSION = 5;
   let state = loadState();
 
   function loadState() {
@@ -436,7 +436,7 @@
   function animateBalanceTo(target) {
     const start = displayedBalance;
     const startTime = performance.now();
-    const duration = 400;
+    const duration = 300;
     function step(now) {
       const t = Math.min(1, (now - startTime) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
@@ -486,7 +486,6 @@
       const income = businessIncome(b.baseIncome, count);
       const affordable = state.balance >= price;
       
-      // Показываем текущий доход или базовый при первом покупке
       const displayIncome = count > 0 ? income : b.baseIncome;
 
       const card = document.createElement("div");
@@ -591,10 +590,11 @@
     if (state.energy <= 0) { showToast("Not enough energy"); return; }
     
     const levelIdx = getLevelIdx(state.balance);
-    const levelBonus = Math.pow(2, levelIdx);
-    const passiveBonus = Math.floor(getPassiveIncome() * 0.0005);
+    // ИСПРАВЛЕННАЯ ФОРМУЛА ТАПА: Базовый тап дает 5 SP + прогрессирует от уровня и пассивного дохода
+    const levelBonus = (levelIdx + 1) * 4;
+    const passiveBonus = Math.floor(getPassiveIncome() * 0.002);
     
-    const gain = 1 + levelBonus + passiveBonus;
+    const gain = 5 + levelBonus + passiveBonus;
     
     state.balance += gain;
     state.energy = Math.max(0, state.energy - 1);
@@ -613,7 +613,7 @@
     }
 
     renderHome();
-    renderBusiness(); // Обновление списка бизнесов для актуализации состояния кнопок (доступно/недоступно)
+    renderBusiness();
     renderProfile();
     checkAchievements();
   }
@@ -643,7 +643,7 @@
 
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
-      state.energy = Math.min(MAX_ENERGY, state.energy + 3);
+      state.energy = Math.min(MAX_ENERGY, state.energy + 5);
       saveState();
       renderHome();
     }
@@ -665,7 +665,7 @@
   function checkWelcomeBack() {
     const hoursAway = (Date.now() - (state.lastActive || Date.now())) / 1000 / 3600;
     const earned = Math.floor(getPassiveIncome() * hoursAway);
-    if (earned > 10) {
+    if (earned > 5) {
       state.balance += earned;
       saveState();
       $("welcome-amount").textContent = "+" + formatMoney(earned) + " SP";
