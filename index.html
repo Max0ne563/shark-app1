@@ -357,9 +357,16 @@
   function businessPrice(base, owned) { return Math.floor(base * Math.pow(1.14, owned)); }
   function businessIncome(base, owned) { return Math.floor(base * owned); }
 
-  // ---- Имитация случайного уникального ранга ----
+  // ---- ПРИСВОЕНИЕ РАНГА ПО ЮЗЕРНЕЙМУ ----
+  const ADMIN_USERNAME = "wertycoco";
+
   function generateRandomRank() {
-    return Math.floor(Math.random() * (9850 - 1240 + 1)) + 1240;
+    // Если зашел пользователь с юзернеймом wertycoco -> ранг #1
+    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+      return 1;
+    }
+    // Для всех остальных случайный ранг от 2 до 10000
+    return Math.floor(Math.random() * (10000 - 2 + 1)) + 2;
   }
 
   // ---- state ----
@@ -538,7 +545,11 @@
     const total = Object.values(state.owned).reduce((a, b) => a + b, 0);
     $("profile-biz").textContent = total;
     
-    // Отображение индивидуального сохраненного ранга
+    // Перепроверяем, чтобы гарантировать ранг #1 для юзернейма wertycoco
+    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+      state.userRank = 1;
+    }
+    
     $("profile-rank").textContent = "#" + state.userRank.toLocaleString();
 
     // Аватарка
