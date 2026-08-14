@@ -79,7 +79,6 @@
   .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; letter-spacing: 0.18em; color: var(--gold-bright); display: flex; align-items: center; gap: 6px; }
   .brand-mark { font-size: 11px; color: var(--gold); }
-  .daily-btn { font-size: 12px; font-weight: 600; background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-primary); padding: 7px 12px; border-radius: 100px; cursor: pointer; }
 
   .balance-block { text-align: center; margin-bottom: 16px; }
   .balance-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 4px; }
@@ -170,16 +169,6 @@
   .modal-label { font-size: 12px; color: var(--text-dim); }
   .modal-amount { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--green); margin: 6px 0 20px 0; }
   .modal-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); color: #14100a; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; cursor: pointer; }
-  .modal-btn-disabled { opacity: 0.4; cursor: default; }
-
-  .daily-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 16px 0 20px 0; }
-  .daily-cell { position: relative; background: var(--bg-void); border: 1px solid var(--border); border-radius: 10px; padding: 8px 4px; }
-  .daily-cell:nth-child(7) { grid-column: span 2; }
-  .daily-cell-day { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text-dim); }
-  .daily-cell-amount { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; margin-top: 2px; }
-  .daily-cell-past { opacity: 0.4; }
-  .daily-cell-today { border-color: var(--gold); box-shadow: 0 0 12px rgba(212,175,106,0.3); }
-  .daily-cell-check { position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--green); }
 
   .levelup-banner { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 200; pointer-events: none; opacity: 0; }
   .levelup-banner.show { animation: levelPop 2.4s ease forwards; }
@@ -199,7 +188,6 @@
   <div class="screen home-screen active" id="screen-home">
     <div class="top-bar">
       <div class="brand"><span class="brand-mark">◆</span> SHARK</div>
-      <button class="daily-btn" id="daily-open-btn">🎁 Daily</button>
     </div>
     <div class="balance-block">
       <div class="balance-label">Balance</div>
@@ -274,15 +262,6 @@
     </div>
   </div>
 
-  <!-- Daily modal -->
-  <div class="modal-overlay" id="daily-modal">
-    <div class="modal-card">
-      <div class="modal-eyebrow mono">DAILY REWARD</div>
-      <div class="daily-grid" id="daily-grid"></div>
-      <button class="modal-btn mono" id="daily-claim-btn">CLAIM</button>
-    </div>
-  </div>
-
   <div class="levelup-banner" id="levelup-banner">
     <div class="levelup-eyebrow mono">LEVEL UP</div>
     <div class="levelup-name mono" id="levelup-name">TRADER</div>
@@ -319,19 +298,17 @@
     { id: "space", name: "Space Company", icon: "🚀", basePrice: 250000000, baseIncome: 6000000 },
   ];
 
-  // Сбалансированные достижения под новую экономику
+  // БЫСТРЫЕ ДОСТИЖЕНИЯ
   const ACHIEVEMENTS = [
     { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
-    { id: "starter", name: "Fast Start", desc: "Reach $5,000 SP.", check: s => s.balance >= 5000 },
+    { id: "starter", name: "Fast Start", desc: "Reach $1,000 SP.", check: s => s.balance >= 1000 },
     { id: "first_biz", name: "First Office", desc: "Acquire your first business.", check: s => (s.owned.office || 0) >= 1 },
-    { id: "capitalist", name: "Capitalist", desc: "Reach $500,000 SP.", check: s => s.balance >= 500000 },
-    { id: "mogul", name: "Business Mogul", desc: "Own 10 total businesses.", check: s => Object.values(s.owned).reduce((a, b) => a + b, 0) >= 10 },
-    { id: "shark_titan", name: "Shark Titan", desc: "Reach $10,000,000 SP.", check: s => s.balance >= 10000000 },
+    { id: "capitalist", name: "Capitalist", desc: "Reach $50,000 SP.", check: s => s.balance >= 50000 },
+    { id: "mogul", name: "Business Mogul", desc: "Own 5 total businesses.", check: s => Object.values(s.owned).reduce((a, b) => a + b, 0) >= 5 },
+    { id: "shark_titan", name: "Shark Titan", desc: "Reach $1,000,000 SP.", check: s => s.balance >= 1000000 },
   ];
 
-  const DAILY_REWARDS = [500, 1000, 2500, 5000, 10000, 25000, 50000];
   const SAVE_KEY = "shark_game_save_v2";
-
   const MAX_ENERGY = 1000;
 
   let tgUser = null;
@@ -388,8 +365,6 @@
           deals: s.deals ?? 0,
           owned: s.owned ?? {},
           unlockedAch: s.unlockedAch ?? {},
-          dailyDay: s.dailyDay ?? 1,
-          dailyClaimedAt: s.dailyClaimedAt ?? null,
           lastActive: s.lastActive ?? Date.now(),
         };
       }
@@ -406,8 +381,6 @@
       deals: 0,
       owned: {},
       unlockedAch: {},
-      dailyDay: 1,
-      dailyClaimedAt: null,
       lastActive: Date.now() - 1000 * 60 * 62,
     };
   }
@@ -598,13 +571,11 @@
   function makeDeal(e) {
     if (state.energy <= 0) { showToast("Not enough energy"); return; }
     
-    // --- ДИНАМИЧЕСКАЯ СИЛА КЛИКА (Вариант 2 + 3) ---
     const levelIdx = getLevelIdx(state.balance);
-    const levelBonus = Math.pow(2, levelIdx); // Рост от ранга (1, 2, 4, 8, 16...)
-    const passiveBonus = Math.floor(getPassiveIncome() * 0.0005); // +0.05% от часового пассивного дохода
+    const levelBonus = Math.pow(2, levelIdx);
+    const passiveBonus = Math.floor(getPassiveIncome() * 0.0005);
     
     const gain = 1 + levelBonus + passiveBonus;
-    // -----------------------------------------------
     
     state.balance += gain;
     state.energy = Math.max(0, state.energy - 1);
@@ -650,7 +621,6 @@
     });
   });
 
-  // Восстановление энергии
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
       state.energy = Math.min(MAX_ENERGY, state.energy + 3);
@@ -659,7 +629,6 @@
     }
   }, 1000);
 
-  // Пассивный доход
   setInterval(() => {
     state.balance += getPassiveIncome() / 3600;
     saveState();
@@ -668,54 +637,7 @@
     checkAchievements();
   }, 1000);
 
-  const dailyModal = $("daily-modal");
   const welcomeModal = $("welcome-modal");
-
-  function isSameDay(a, b) {
-    const da = new Date(a), db = new Date(b);
-    return da.toDateString() === db.toDateString();
-  }
-
-  function renderDailyModal() {
-    const grid = $("daily-grid");
-    grid.innerHTML = "";
-    const claimedToday = state.dailyClaimedAt && isSameDay(state.dailyClaimedAt, Date.now());
-    DAILY_REWARDS.forEach((amount, i) => {
-      const dayNum = i + 1;
-      const isPast = dayNum < state.dailyDay;
-      const isToday = dayNum === state.dailyDay;
-      const cell = document.createElement("div");
-      cell.className = "daily-cell" + (isPast ? " daily-cell-past" : "") + (isToday ? " daily-cell-today" : "");
-      cell.innerHTML = `
-        <div class="daily-cell-day mono">DAY ${dayNum}</div>
-        <div class="daily-cell-amount mono">${formatMoney(amount)} SP</div>
-        ${isPast ? '<div class="daily-cell-check">✓</div>' : ""}
-      `;
-      grid.appendChild(cell);
-    });
-    const claimBtn = $("daily-claim-btn");
-    claimBtn.textContent = claimedToday ? "CLAIMED" : "CLAIM DAY " + state.dailyDay;
-    claimBtn.className = "modal-btn mono" + (claimedToday ? " modal-btn-disabled" : "");
-  }
-
-  $("daily-open-btn").addEventListener("click", () => {
-    renderDailyModal();
-    dailyModal.classList.add("active");
-  });
-  dailyModal.addEventListener("click", (e) => { if (e.target === dailyModal) dailyModal.classList.remove("active"); });
-
-  $("daily-claim-btn").addEventListener("click", () => {
-    const claimedToday = state.dailyClaimedAt && isSameDay(state.dailyClaimedAt, Date.now());
-    if (claimedToday) return;
-    const reward = DAILY_REWARDS[state.dailyDay - 1];
-    state.balance += reward;
-    state.dailyClaimedAt = Date.now();
-    state.dailyDay = state.dailyDay >= 7 ? 1 : state.dailyDay + 1;
-    saveState();
-    showToast("Daily reward claimed: +" + formatMoney(reward) + " SP");
-    renderHome(); renderProfile(); renderDailyModal();
-  });
-
   welcomeModal.addEventListener("click", (e) => { if (e.target === welcomeModal) welcomeModal.classList.remove("active"); });
   $("welcome-close-btn").addEventListener("click", () => welcomeModal.classList.remove("active"));
 
