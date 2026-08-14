@@ -2,10 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>SHARK — Hunt. Trade. Dominate.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Подключение Telegram WebApp SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
     --bg-void: #05070d;
@@ -20,12 +22,20 @@
     --text-dim: #7a869e;
     --border: rgba(212,175,106,0.14);
   }
-  * { box-sizing: border-box; }
+  * { 
+    box-sizing: border-box; 
+    /* Блокировка выделения текста и скроллинга жестами */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
   html, body {
     margin: 0; padding: 0; height: 100%;
     background: #000;
     font-family: 'Space Grotesk', -apple-system, sans-serif;
     overscroll-behavior: none;
+    overflow: hidden; /* Отключение скроллинга всей страницы */
+    touch-action: manipulation;
   }
   .mono { font-family: 'JetBrains Mono', monospace; }
 
@@ -42,6 +52,7 @@
       linear-gradient(180deg, var(--bg-void), var(--bg-deep));
     color: var(--text-primary);
     overflow: hidden;
+    touch-action: none; /* Запрет скролла мышью или пальцем */
   }
   @media (min-width: 480px) {
     #shark-root {
@@ -58,6 +69,7 @@
     overflow-y: auto;
     padding: 18px 18px 100px 18px;
     display: none;
+    -webkit-overflow-scrolling: touch;
   }
   .screen.active { display: block; }
   .screen::-webkit-scrollbar { display: none; }
@@ -89,7 +101,7 @@
   .energy-fill { height: 100%; background: linear-gradient(90deg, #4a9eff, #7cc3ff); border-radius: 100px; transition: width 0.4s ease; }
   .energy-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); }
 
-  .shark-stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 190px; }
+  .shark-stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 190px; touch-action: none; }
   .shark-tap-btn {
     position: relative; width: 190px; height: 190px; border-radius: 50%;
     border: 2px solid rgba(212,175,106,0.45);
@@ -98,12 +110,12 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent;
     transition: transform 0.08s ease, border-color 0.15s ease;
+    touch-action: manipulation;
   }
   .shark-tap-btn:active { transform: scale(0.94); border-color: rgba(240,200,128,0.8); }
   .shark-glow { position: absolute; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(74,158,255,0.28), transparent 70%); transition: transform 0.15s ease, opacity 0.15s ease; pointer-events: none; }
   .shark-glow.pulse { transform: scale(1.15); }
-  .shark-figure { font-size: 92px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)); transform: scaleX(-1); position: relative; z-index: 1; user-select: none; pointer-events: none; }
-
+  .shark-figure { font-size: 92px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)); transform: scaleX(-1); position: relative; z-index: 1; pointer-events: none; }
 
   .floater { position: fixed; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; color: var(--green); pointer-events: none; animation: floatUp 0.9s ease-out forwards; z-index: 50; text-shadow: 0 0 12px rgba(61,220,151,0.6); }
   @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
@@ -125,41 +137,11 @@
   .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
   .biz-buy-disabled { opacity: 0.4; }
 
-  .market-list { display: flex; flex-direction: column; gap: 10px; }
-  .market-card { display: flex; align-items: center; justify-content: space-between; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 14px; }
-  .market-name { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-  .market-change { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; margin-top: 4px; }
-  .text-green { color: var(--green); }
-  .text-red { color: var(--red); }
-  .mini-chart { width: 90px; height: 36px; }
-
-  .podium { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 18px; }
-  .podium-item { flex: 1; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px; padding: 12px 8px; text-align: center; }
-  .podium-1 { padding-top: 20px; border-color: rgba(212,175,106,0.5); background: linear-gradient(180deg, rgba(212,175,106,0.12), var(--bg-panel)); }
-  .podium-2 { order: -1; }
-  .podium-rank { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); margin-bottom: 4px; }
-  .podium-avatar { font-size: 28px; transform: scaleX(-1); }
-  .podium-name { font-size: 11px; font-weight: 600; margin-top: 4px; }
-  .podium-worth { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); margin-top: 2px; }
-
-  .rank-list { display: flex; flex-direction: column; gap: 6px; }
-  .rank-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--bg-panel); border: 1px solid var(--border); }
-  .rank-row-you { border-color: rgba(212,175,106,0.5); background: rgba(212,175,106,0.06); }
-  .rank-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); width: 32px; }
-  .rank-name { flex: 1; font-size: 13px; font-weight: 500; }
-  .rank-worth { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--gold-bright); }
-
   .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 18px; }
-  .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 10px auto; border: 1px solid var(--border); transform: scaleX(-1); }
-  .profile-name { font-weight: 700; font-size: 16px; }
-  .profile-edit-btn {
-    margin-top: 8px; padding: 6px 12px; border-radius: 100px;
-    border: 1px solid var(--border); background: var(--bg-panel-2);
-    color: var(--gold-bright); font-family: 'JetBrains Mono', monospace;
-    font-size: 9px; font-weight: 700; cursor: pointer;
-  }
-  .profile-edit-btn:active { transform: scale(0.96); }
-  .profile-level { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); letter-spacing: 0.1em; margin-top: 2px; margin-bottom: 16px; }
+  .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 10px auto; border: 1px solid var(--border); overflow: hidden; }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .profile-level { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); letter-spacing: 0.1em; margin-bottom: 16px; }
   .profile-stats { display: flex; justify-content: space-around; }
   .profile-stat-label { font-size: 10px; color: var(--text-dim); }
   .profile-stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; margin-top: 3px; }
@@ -260,9 +242,8 @@
   <div class="screen" id="screen-profile">
     <div class="screen-header"><div class="screen-title mono">Profile</div></div>
     <div class="profile-card">
-      <div class="profile-avatar">🦈</div>
+      <div class="profile-avatar" id="profile-avatar">🦈</div>
       <div class="profile-name" id="profile-name">SHARK</div>
-      <button class="profile-edit-btn" id="profile-edit-btn">✎ RENAME</button>
       <div class="profile-level mono" id="profile-level">ROOKIE</div>
       <div class="profile-stats">
         <div class="profile-stat"><div class="profile-stat-label">Net Worth</div><div class="profile-stat-value mono" id="profile-networth">$0</div></div>
@@ -314,6 +295,11 @@
 (function () {
   "use strict";
 
+  // Отключаем двойной клик / масштабирование по двойному тапу
+  document.addEventListener('gesturestart', function (e) {
+    e.preventDefault();
+  });
+
   const LEVELS = [
     { name: "Rookie", threshold: 0, incomeMult: 1 },
     { name: "Trader", threshold: 5000, incomeMult: 1.4 },
@@ -334,24 +320,6 @@
     { id: "space", name: "Space Company", icon: "🚀", basePrice: 1000000000, baseIncome: 25000000 },
   ];
 
-  const MARKET_DATA = [
-    { name: "SHARK INDEX", change: 4.82 },
-    { name: "OCEAN TECH", change: 12.4 },
-    { name: "BANKS", change: -2.1 },
-    { name: "AI", change: 8.7 },
-    { name: "ENERGY", change: 3.4 },
-  ];
-
-  const LEADERBOARD = [
-    { rank: 1, name: "WhaleShark", worth: 92400000000 },
-    { rank: 2, name: "DarkFin", worth: 81700000000 },
-    { rank: 3, name: "OceanKing", worth: 72100000000 },
-    { rank: 4, name: "MaxShark", worth: 48200000000, isYou: true },
-    { rank: 5, name: "IronTide", worth: 39800000000 },
-    { rank: 6, name: "SilentOrca", worth: 31200000000 },
-    { rank: 7, name: "GoldGill", worth: 24900000000 },
-  ];
-
   const ACHIEVEMENTS = [
     { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
     { id: "millionaire", name: "Millionaire", desc: "Reach $1,000,000.", check: s => s.balance >= 1000000 },
@@ -361,8 +329,18 @@
   ];
 
   const DAILY_REWARDS = [1000, 2500, 5000, 10000, 25000, 50000, 100000];
-
   const SAVE_KEY = "shark_game_save_v1";
+
+  // Данные пользователя Telegram
+  let tgUser = null;
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      tgUser = tg.initDataUnsafe.user;
+    }
+  }
 
   function formatMoney(n) {
     if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
@@ -390,22 +368,10 @@
         const s = JSON.parse(raw);
         if (s.profileVersion !== PROFILE_VERSION) {
           localStorage.removeItem(SAVE_KEY);
-          return {
-            profileVersion: PROFILE_VERSION,
-            profileName: "SHARK",
-            balance: 0,
-            energy: 100,
-            deals: 0,
-            owned: {},
-            unlockedAch: {},
-            dailyDay: 1,
-            dailyClaimedAt: null,
-            lastActive: Date.now()
-          };
+          return createDefaultState();
         }
         return {
           profileVersion: PROFILE_VERSION,
-          profileName: s.profileName ?? "SHARK",
           balance: s.balance ?? 0,
           energy: s.energy ?? 100,
           deals: s.deals ?? 0,
@@ -417,8 +383,12 @@
         };
       }
     } catch (e) {}
+    return createDefaultState();
+  }
+
+  function createDefaultState() {
     return {
-      profileName: "SHARK",
+      profileVersion: PROFILE_VERSION,
       balance: 0,
       energy: 100,
       deals: 0,
@@ -429,6 +399,7 @@
       lastActive: Date.now() - 1000 * 60 * 62,
     };
   }
+
   function saveState() {
     state.profileVersion = PROFILE_VERSION;
     state.lastActive = Date.now();
@@ -545,63 +516,30 @@
     renderHome(); renderBusiness(); renderProfile(); checkAchievements();
   }
 
-  function renderMarket() {
-    const list = $("market-list");
-    list.innerHTML = "";
-    MARKET_DATA.forEach(m => {
-      const positive = m.change >= 0;
-      const points = Array.from({ length: 12 }, () => Math.random());
-      const path = points.map((p, i) => `${(i / (points.length - 1)) * 100},${40 - p * 32 - (positive ? i * 0.6 : -i * 0.3)}`).join(" ");
-      const card = document.createElement("div");
-      card.className = "market-card";
-      card.innerHTML = `
-        <div class="market-left">
-          <div class="market-name mono">${m.name}</div>
-          <div class="market-change mono ${positive ? "text-green" : "text-red"}">${positive ? "+" : ""}${m.change.toFixed(2)}%</div>
-        </div>
-        <svg viewBox="0 0 100 40" class="mini-chart" preserveAspectRatio="none">
-          <polyline points="${path}" fill="none" stroke="${positive ? "#3ddc97" : "#ff5c5c"}" stroke-width="2" />
-        </svg>
-      `;
-      list.appendChild(card);
-    });
-  }
-
-  function renderRank() {
-    const podium = $("podium");
-    podium.innerHTML = "";
-    LEADERBOARD.slice(0, 3).forEach(p => {
-      const div = document.createElement("div");
-      div.className = "podium-item podium-" + p.rank;
-      div.innerHTML = `
-        <div class="podium-rank mono">#${p.rank}</div>
-        <div class="podium-avatar">🦈</div>
-        <div class="podium-name">${p.name}</div>
-        <div class="podium-worth mono">${formatMoney(p.worth)} SP</div>
-      `;
-      podium.appendChild(div);
-    });
-    const rankList = $("rank-list");
-    rankList.innerHTML = "";
-    LEADERBOARD.slice(3).forEach(p => {
-      const row = document.createElement("div");
-      row.className = "rank-row" + (p.isYou ? " rank-row-you" : "");
-      row.innerHTML = `
-        <span class="rank-num mono">#${p.rank}</span>
-        <span class="rank-name">${p.name}${p.isYou ? " (You)" : ""}</span>
-        <span class="rank-worth mono">${formatMoney(p.worth)} SP</span>
-      `;
-      rankList.appendChild(row);
-    });
-  }
-
   function renderProfile() {
     const idx = getLevelIdx(state.balance);
-    $("profile-name").textContent = state.profileName || "SHARK";
+    
+    // Подгрузка данных из Telegram
+    let displayName = "SHARK";
+    if (tgUser) {
+      displayName = tgUser.first_name + (tgUser.last_name ? " " + tgUser.last_name : "");
+    }
+    
+    $("profile-name").textContent = displayName;
     $("profile-level").textContent = LEVELS[idx].name.toUpperCase();
     $("profile-networth").textContent = formatMoney(state.balance) + " SP";
     const total = Object.values(state.owned).reduce((a, b) => a + b, 0);
     $("profile-biz").textContent = total;
+
+    // Аватарка
+    const avatarEl = $("profile-avatar");
+    if (tgUser && tgUser.photo_url) {
+      avatarEl.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
+    } else if (tgUser && tgUser.first_name) {
+      avatarEl.textContent = tgUser.first_name.charAt(0).toUpperCase();
+    } else {
+      avatarEl.textContent = "🦈";
+    }
 
     const list = $("ach-list");
     list.innerHTML = "";
@@ -619,21 +557,6 @@
       list.appendChild(card);
     });
   }
-
-  $("profile-edit-btn").addEventListener("click", () => {
-    const current = state.profileName || "SHARK";
-    const name = window.prompt("Введите новое имя профиля:", current);
-    if (name === null) return;
-    const cleaned = name.trim().replace(/\s+/g, " ");
-    if (!cleaned) {
-      showToast("Имя не может быть пустым");
-      return;
-    }
-    state.profileName = cleaned.slice(0, 20);
-    saveState();
-    renderProfile();
-    showToast("Профиль переименован");
-  });
 
   function checkAchievements() {
     ACHIEVEMENTS.forEach(a => {
@@ -664,11 +587,15 @@
     saveState();
 
     const rect = sharkTapBtn.getBoundingClientRect();
-    const x = e && e.clientX ? e.clientX : rect.left + rect.width / 2;
-    const y = e && e.clientY ? e.clientY : rect.top;
+    const x = e && e.clientX ? e.clientX : (e && e.touches ? e.touches[0].clientX : rect.left + rect.width / 2);
+    const y = e && e.clientY ? e.clientY : (e && e.touches ? e.touches[0].clientY : rect.top);
     spawnFloater(x, y, gain);
 
-    if (window.navigator?.vibrate) window.navigator.vibrate(8);
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
+    } else if (window.navigator?.vibrate) {
+      window.navigator.vibrate(8);
+    }
 
     renderHome();
     renderProfile();
@@ -679,9 +606,17 @@
   sharkTapBtn.addEventListener("mousedown", () => sharkGlow.classList.add("pulse"));
   sharkTapBtn.addEventListener("mouseup", () => sharkGlow.classList.remove("pulse"));
   sharkTapBtn.addEventListener("mouseleave", () => sharkGlow.classList.remove("pulse"));
-  sharkTapBtn.addEventListener("touchstart", () => sharkGlow.classList.add("pulse"), { passive: true });
+  sharkTapBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault(); // Предотвращаем скролл и зум при быстрых тапах
+    sharkGlow.classList.add("pulse");
+    makeDeal(e);
+  }, { passive: false });
+  
   sharkTapBtn.addEventListener("touchend", () => sharkGlow.classList.remove("pulse"));
-  sharkTapBtn.addEventListener("click", makeDeal);
+  sharkTapBtn.addEventListener("click", (e) => {
+    // Выполняем click только если событие вызвано не сенсорным нажатием
+    if (e.detail !== 0) makeDeal(e);
+  });
 
   // tabs
   document.querySelectorAll(".nav-item").forEach(btn => {
@@ -773,12 +708,6 @@
       $("welcome-amount").textContent = "+" + formatMoney(earned) + " SP";
       setTimeout(() => welcomeModal.classList.add("active"), 500);
     }
-  }
-
-  // Telegram WebApp integration (safe no-op outside Telegram)
-  if (window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.expand();
   }
 
   // init
