@@ -295,12 +295,10 @@
 (function () {
   "use strict";
 
-  // Блокировка масштабирования жестами
   document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
   });
 
-  // Перебалансировка уровней под умеренную экономику
   const LEVELS = [
     { name: "Rookie", threshold: 0, incomeMult: 1 },
     { name: "Trader", threshold: 5000, incomeMult: 1.2 },
@@ -312,7 +310,6 @@
     { name: "Shark Lord", threshold: 250000000, incomeMult: 8.0 },
   ];
 
-  // Сбалансированная бизнес-сетка под Airdrop
   const BUSINESS_DATA = [
     { id: "office", name: "Small Office", icon: "🏢", basePrice: 2500, baseIncome: 150 },
     { id: "brokerage", name: "Brokerage", icon: "📊", basePrice: 25000, baseIncome: 1200 },
@@ -322,21 +319,21 @@
     { id: "space", name: "Space Company", icon: "🚀", basePrice: 250000000, baseIncome: 6000000 },
   ];
 
+  // Сбалансированные достижения под новую экономику
   const ACHIEVEMENTS = [
     { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
-    { id: "millionaire", name: "Millionaire", desc: "Reach $1,000,000.", check: s => s.balance >= 1000000 },
-    { id: "banker", name: "Banker", desc: "Buy your first bank.", check: s => (s.owned.bank || 0) >= 1 },
-    { id: "tycoon", name: "Tycoon", desc: "Reach $50,000,000.", check: s => s.balance >= 50000000 },
-    { id: "whale", name: "Whale", desc: "Reach $250,000,000.", check: s => s.balance >= 250000000 },
+    { id: "starter", name: "Fast Start", desc: "Reach $5,000 SP.", check: s => s.balance >= 5000 },
+    { id: "first_biz", name: "First Office", desc: "Acquire your first business.", check: s => (s.owned.office || 0) >= 1 },
+    { id: "capitalist", name: "Capitalist", desc: "Reach $500,000 SP.", check: s => s.balance >= 500000 },
+    { id: "mogul", name: "Business Mogul", desc: "Own 10 total businesses.", check: s => Object.values(s.owned).reduce((a, b) => a + b, 0) >= 10 },
+    { id: "shark_titan", name: "Shark Titan", desc: "Reach $10,000,000 SP.", check: s => s.balance >= 10000000 },
   ];
 
-  // Награды адаптивно снижены для устойчивости к аирдропу
   const DAILY_REWARDS = [500, 1000, 2500, 5000, 10000, 25000, 50000];
-  const SAVE_KEY = "shark_game_save_v2"; // Обновленный ключ сохранения
+  const SAVE_KEY = "shark_game_save_v2";
 
   const MAX_ENERGY = 1000;
 
-  // Данные пользователя Telegram
   let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -362,7 +359,6 @@
   function businessPrice(base, owned) { return Math.floor(base * Math.pow(1.15, owned)); }
   function businessIncome(base, owned) { return Math.floor(base * owned); }
 
-  // ---- ПРИСВОЕНИЕ РАНГА ПО ЮЗЕРНЕЙМУ ----
   const ADMIN_USERNAME = "wertycoco";
 
   function generateRandomRank() {
@@ -372,7 +368,6 @@
     return Math.floor(Math.random() * (10000 - 2 + 1)) + 2;
   }
 
-  // ---- state ----
   const PROFILE_VERSION = 4;
   let state = loadState();
 
@@ -428,7 +423,6 @@
     return base * LEVELS[getLevelIdx(state.balance)].incomeMult;
   }
 
-  // ---- DOM refs ----
   const $ = id => document.getElementById(id);
   const balanceEl = $("balance-value");
   const incomeEl = $("income-value");
@@ -477,7 +471,6 @@
     const progress = next ? ((state.balance - level.threshold) / (next.threshold - level.threshold)) * 100 : 100;
     progressFillEl.style.width = Math.min(100, progress) + "%";
     
-    // Энергетическая шкала
     const energyPct = (state.energy / MAX_ENERGY) * 100;
     energyFillEl.style.width = energyPct + "%";
     energyTextEl.textContent = state.energy + "/" + MAX_ENERGY;
@@ -605,8 +598,13 @@
   function makeDeal(e) {
     if (state.energy <= 0) { showToast("Not enough energy"); return; }
     
-    // Перебалансированный доход за клик
-    const gain = 1; 
+    // --- ДИНАМИЧЕСКАЯ СИЛА КЛИКА (Вариант 2 + 3) ---
+    const levelIdx = getLevelIdx(state.balance);
+    const levelBonus = Math.pow(2, levelIdx); // Рост от ранга (1, 2, 4, 8, 16...)
+    const passiveBonus = Math.floor(getPassiveIncome() * 0.0005); // +0.05% от часового пассивного дохода
+    
+    const gain = 1 + levelBonus + passiveBonus;
+    // -----------------------------------------------
     
     state.balance += gain;
     state.energy = Math.max(0, state.energy - 1);
@@ -629,7 +627,6 @@
     checkAchievements();
   }
 
-  // Нажатия и стили
   sharkTapBtn.addEventListener("mousedown", () => sharkGlow.classList.add("pulse"));
   sharkTapBtn.addEventListener("mouseup", () => sharkGlow.classList.remove("pulse"));
   sharkTapBtn.addEventListener("mouseleave", () => sharkGlow.classList.remove("pulse"));
@@ -644,7 +641,6 @@
     if (e.detail !== 0) makeDeal(e);
   });
 
-  // Вкладки
   document.querySelectorAll(".nav-item").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
@@ -654,7 +650,7 @@
     });
   });
 
-  // Быстрое восстановление энергии (+3 ед/сек)
+  // Восстановление энергии
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
       state.energy = Math.min(MAX_ENERGY, state.energy + 3);
@@ -672,7 +668,6 @@
     checkAchievements();
   }, 1000);
 
-  // Ежедневные бонусы
   const dailyModal = $("daily-modal");
   const welcomeModal = $("welcome-modal");
 
@@ -724,7 +719,6 @@
   welcomeModal.addEventListener("click", (e) => { if (e.target === welcomeModal) welcomeModal.classList.remove("active"); });
   $("welcome-close-btn").addEventListener("click", () => welcomeModal.classList.remove("active"));
 
-  // Офлайн-заработок
   function checkWelcomeBack() {
     const hoursAway = (Date.now() - (state.lastActive || Date.now())) / 1000 / 3600;
     const earned = Math.floor(getPassiveIncome() * hoursAway);
@@ -736,7 +730,6 @@
     }
   }
 
-  // Инициализация
   renderHome();
   renderBusiness();
   renderProfile();
