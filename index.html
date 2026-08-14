@@ -131,10 +131,26 @@
   .biz-name { font-size: 13px; font-weight: 600; }
   .biz-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); background: rgba(212,175,106,0.1); padding: 1px 6px; border-radius: 100px; }
   .biz-income { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); margin-top: 3px; }
-  .biz-buy { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-panel-2); cursor: pointer; flex-shrink: 0; }
-  .biz-buy-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--gold-bright); letter-spacing: 0.08em; }
-  .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; }
-  .biz-buy-disabled { opacity: 0.4; }
+  
+  /* ОБНОВЛЕННЫЙ СТИЛЬ КНОПОК ПОКУПКИ */
+  .biz-buy { 
+    display: flex; flex-direction: column; align-items: center; gap: 2px; 
+    padding: 8px 14px; border-radius: 12px; 
+    border: 1px solid rgba(212, 175, 106, 0.4); 
+    background: linear-gradient(180deg, #1f2c48, #141d30); 
+    cursor: pointer; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.15s ease;
+  }
+  .biz-buy:active { transform: scale(0.95); }
+  .biz-buy-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: var(--gold-bright); letter-spacing: 0.08em; }
+  .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--text-primary); }
+  .biz-buy-disabled { 
+    opacity: 0.35; 
+    border-color: rgba(255, 255, 255, 0.08); 
+    background: var(--bg-panel-2); 
+    box-shadow: none;
+  }
 
   .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 18px; }
   .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 10px auto; border: 1px solid var(--border); overflow: hidden; }
@@ -298,7 +314,6 @@
     { id: "space", name: "Space Company", icon: "🚀", basePrice: 250000000, baseIncome: 6000000 },
   ];
 
-  // БЫСТРЫЕ ДОСТИЖЕНИЯ
   const ACHIEVEMENTS = [
     { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
     { id: "starter", name: "Fast Start", desc: "Reach $1,000 SP.", check: s => s.balance >= 1000 },
@@ -470,6 +485,10 @@
       const price = businessPrice(b.basePrice, count);
       const income = businessIncome(b.baseIncome, count);
       const affordable = state.balance >= price;
+      
+      // Показываем текущий доход или базовый при первом покупке
+      const displayIncome = count > 0 ? income : b.baseIncome;
+
       const card = document.createElement("div");
       card.className = "biz-card";
       card.innerHTML = `
@@ -479,7 +498,7 @@
             <span class="biz-name">${b.name}</span>
             ${count > 0 ? `<span class="biz-count mono">×${count}</span>` : ""}
           </div>
-          <div class="biz-income mono">${count > 0 ? "+" + formatMoney(income) + " SP/hour" : "Passive income: 0 SP/hour"}</div>
+          <div class="biz-income mono">+${formatMoney(displayIncome)} SP / hour</div>
         </div>
         <button class="biz-buy ${affordable ? "" : "biz-buy-disabled"}">
           <span class="biz-buy-label mono">${count > 0 ? "UPGRADE" : "BUY"}</span>
@@ -594,6 +613,7 @@
     }
 
     renderHome();
+    renderBusiness(); // Обновление списка бизнесов для актуализации состояния кнопок (доступно/недоступно)
     renderProfile();
     checkAchievements();
   }
@@ -633,6 +653,7 @@
     state.balance += getPassiveIncome() / 3600;
     saveState();
     renderHome();
+    renderBusiness();
     renderProfile();
     checkAchievements();
   }, 1000);
