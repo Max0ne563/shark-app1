@@ -24,7 +24,7 @@
   }
   * { 
     box-sizing: border-box; 
-    /* Блокировка выделения текста и скроллинга жестами */
+    /* Блокировка выделения текста */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -52,7 +52,7 @@
       linear-gradient(180deg, var(--bg-void), var(--bg-deep));
     color: var(--text-primary);
     overflow: hidden;
-    touch-action: none; /* Запрет скролла мышью или пальцем */
+    touch-action: none;
   }
   @media (min-width: 480px) {
     #shark-root {
@@ -248,7 +248,7 @@
       <div class="profile-stats">
         <div class="profile-stat"><div class="profile-stat-label">Net Worth</div><div class="profile-stat-value mono" id="profile-networth">$0</div></div>
         <div class="profile-stat"><div class="profile-stat-label">Businesses</div><div class="profile-stat-value mono" id="profile-biz">0</div></div>
-        <div class="profile-stat"><div class="profile-stat-label">Rank</div><div class="profile-stat-value mono">#8,421</div></div>
+        <div class="profile-stat"><div class="profile-stat-label">Rank</div><div class="profile-stat-value mono" id="profile-rank">#...</div></div>
       </div>
     </div>
     <div class="ach-section">
@@ -295,7 +295,7 @@
 (function () {
   "use strict";
 
-  // Отключаем двойной клик / масштабирование по двойному тапу
+  // Блокировка масштабирования жестами
   document.addEventListener('gesturestart', function (e) {
     e.preventDefault();
   });
@@ -357,6 +357,11 @@
   function businessPrice(base, owned) { return Math.floor(base * Math.pow(1.14, owned)); }
   function businessIncome(base, owned) { return Math.floor(base * owned); }
 
+  // ---- Имитация случайного уникального ранга ----
+  function generateRandomRank() {
+    return Math.floor(Math.random() * (9850 - 1240 + 1)) + 1240;
+  }
+
   // ---- state ----
   const PROFILE_VERSION = 3;
   let state = loadState();
@@ -372,6 +377,7 @@
         }
         return {
           profileVersion: PROFILE_VERSION,
+          userRank: s.userRank ?? generateRandomRank(),
           balance: s.balance ?? 0,
           energy: s.energy ?? 100,
           deals: s.deals ?? 0,
@@ -389,6 +395,7 @@
   function createDefaultState() {
     return {
       profileVersion: PROFILE_VERSION,
+      userRank: generateRandomRank(),
       balance: 0,
       energy: 100,
       deals: 0,
@@ -519,7 +526,7 @@
   function renderProfile() {
     const idx = getLevelIdx(state.balance);
     
-    // Подгрузка данных из Telegram
+    // Данные Telegram
     let displayName = "SHARK";
     if (tgUser) {
       displayName = tgUser.first_name + (tgUser.last_name ? " " + tgUser.last_name : "");
@@ -530,6 +537,9 @@
     $("profile-networth").textContent = formatMoney(state.balance) + " SP";
     const total = Object.values(state.owned).reduce((a, b) => a + b, 0);
     $("profile-biz").textContent = total;
+    
+    // Отображение индивидуального сохраненного ранга
+    $("profile-rank").textContent = "#" + state.userRank.toLocaleString();
 
     // Аватарка
     const avatarEl = $("profile-avatar");
@@ -602,23 +612,22 @@
     checkAchievements();
   }
 
-  // shark tap animation
+  // Тапательные анимации
   sharkTapBtn.addEventListener("mousedown", () => sharkGlow.classList.add("pulse"));
   sharkTapBtn.addEventListener("mouseup", () => sharkGlow.classList.remove("pulse"));
   sharkTapBtn.addEventListener("mouseleave", () => sharkGlow.classList.remove("pulse"));
   sharkTapBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault(); // Предотвращаем скролл и зум при быстрых тапах
+    e.preventDefault();
     sharkGlow.classList.add("pulse");
     makeDeal(e);
   }, { passive: false });
   
   sharkTapBtn.addEventListener("touchend", () => sharkGlow.classList.remove("pulse"));
   sharkTapBtn.addEventListener("click", (e) => {
-    // Выполняем click только если событие вызвано не сенсорным нажатием
     if (e.detail !== 0) makeDeal(e);
   });
 
-  // tabs
+  // Вкладки
   document.querySelectorAll(".nav-item").forEach(btn => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
@@ -628,7 +637,7 @@
     });
   });
 
-  // energy regen
+  // Регенерация энергии
   setInterval(() => {
     if (state.energy < 100) {
       state.energy = Math.min(100, state.energy + 1);
@@ -637,7 +646,7 @@
     }
   }, 4000);
 
-  // passive income ticking
+  // Пассивный доход
   setInterval(() => {
     state.balance += getPassiveIncome() / 3600;
     saveState();
@@ -646,7 +655,7 @@
     checkAchievements();
   }, 1000);
 
-  // Daily reward modal
+  // Ежедневные награды
   const dailyModal = $("daily-modal");
   const welcomeModal = $("welcome-modal");
 
@@ -698,7 +707,7 @@
   welcomeModal.addEventListener("click", (e) => { if (e.target === welcomeModal) welcomeModal.classList.remove("active"); });
   $("welcome-close-btn").addEventListener("click", () => welcomeModal.classList.remove("active"));
 
-  // Offline earnings on load
+  // Офлайн-заработок
   function checkWelcomeBack() {
     const hoursAway = (Date.now() - (state.lastActive || Date.now())) / 1000 / 3600;
     const earned = Math.floor(getPassiveIncome() * hoursAway);
