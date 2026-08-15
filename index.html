@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -141,10 +141,20 @@
   .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--text-primary); }
   .biz-buy-disabled { opacity: 0.35; border-color: rgba(255, 255, 255, 0.08); background: var(--bg-panel-2); box-shadow: none; }
 
+  /* PROFILE STYLES WITH AVATAR SUPPORT */
   .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 18px; }
-  .profile-avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 10px auto; border: 1px solid var(--border); overflow: hidden; }
-  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .profile-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .profile-avatar-wrapper { width: 68px; height: 68px; margin: 0 auto 12px auto; position: relative; }
+  .profile-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); box-shadow: 0 0 16px rgba(212,175,106,0.25); display: none; }
+  .profile-avatar-fallback { 
+    width: 100%; height: 100%; border-radius: 50%; 
+    background: linear-gradient(135deg, #1f2c48, #0f1626); 
+    border: 2px solid var(--gold); 
+    display: flex; align-items: center; justify-content: center; 
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 22px; color: var(--gold-bright);
+    box-shadow: 0 0 16px rgba(212,175,106,0.25);
+  }
+  .profile-name { font-weight: 700; font-size: 16px; margin-bottom: 2px; }
+  .profile-username { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); margin-bottom: 6px; }
   .profile-level { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); letter-spacing: 0.1em; margin-bottom: 14px; }
   .profile-stats { display: flex; justify-content: space-around; }
   .profile-stat-label { font-size: 10px; color: var(--text-dim); }
@@ -211,8 +221,12 @@
   <div class="screen" id="screen-profile">
     <div class="screen-header"><div class="screen-title mono">Profile</div></div>
     <div class="profile-card">
-      <div class="profile-avatar" id="profile-avatar">🦈</div>
-      <div class="profile-name" id="profile-name">SHARK</div>
+      <div class="profile-avatar-wrapper">
+        <img id="profile-avatar-img" class="profile-avatar-img" alt="Avatar" />
+        <div id="profile-avatar-fallback" class="profile-avatar-fallback">SK</div>
+      </div>
+      <div class="profile-name" id="profile-name">SHARK USER</div>
+      <div class="profile-username" id="profile-username">@trader</div>
       <div class="profile-level mono" id="profile-level">ROOKIE</div>
       <div class="profile-stats">
         <div class="profile-stat"><div class="profile-stat-label">Net Worth</div><div class="profile-stat-value mono" id="profile-networth">0 SP</div></div>
@@ -234,34 +248,34 @@
 (function () {
   "use strict";
 
-  // ЖЕСТКИЙ БАЛАНС С БОЛЬШИМИ ПОРОГАМИ UПРАВЛЕНИЯ ИНФЛЯЦИЕЙ
   const LEVELS = [
     { name: "Rookie", threshold: 0, incomeMult: 1.0 },
     { name: "Trader", threshold: 1000, incomeMult: 1.1 },
     { name: "Broker", threshold: 50000, incomeMult: 1.25 },
-    { name: "Investor", threshold: 1000000, incomeMult: 1.5 },       // 1M
-    { name: "Banker", threshold: 25000000, incomeMult: 2.0 },        // 25M
-    { name: "CEO", threshold: 500000000, incomeMult: 3.0 },           // 500M
-    { name: "Tycoon", threshold: 10000000000, incomeMult: 5.0 },     // 10B
-    { name: "Shark Lord", threshold: 250000000000, incomeMult: 10.0 } // 250B
+    { name: "Investor", threshold: 1000000, incomeMult: 1.5 },
+    { name: "Banker", threshold: 25000000, incomeMult: 2.0 },
+    { name: "CEO", threshold: 500000000, incomeMult: 3.0 },
+    { name: "Tycoon", threshold: 10000000000, incomeMult: 5.0 },
+    { name: "Shark Lord", threshold: 250000000000, incomeMult: 10.0 }
   ];
 
-  // СБАЛАНСИРОВАННЫЕ БИЗНЕСЫ
+  // ALL BUSINESSES IN ENGLISH
   const BUSINESS_DATA = [
-    { id: "kiosk", name: "Киоск", icon: "🏪", basePrice: 15, baseIncome: 360 }, // 0.1/сек -> 360/час
-    { id: "carwash", name: "Автомойка", icon: "🚿", basePrice: 100, baseIncome: 2880 },
-    { id: "cafe", name: "Кафе", icon: "☕", basePrice: 1100, baseIncome: 28800 },
-    { id: "restaurant", name: "Ресторан", icon: "🍽️", basePrice: 12000, baseIncome: 169200 },
-    { id: "factory", name: "Завод", icon: "🏭", basePrice: 130000, baseIncome: 936000 },
-    { id: "bank", name: "Банк", icon: "🏦", basePrice: 1400000, baseIncome: 5040000 },
-    { id: "it_company", name: "IT-Компания", icon: "💻", basePrice: 20000000, baseIncome: 39600000 },
-    { id: "ai_corp", name: "AI Корпорация", icon: "🤖", basePrice: 330000000, baseIncome: 342000000 },
-    { id: "space_company", name: "Космос", icon: "🚀", basePrice: 5100000000, baseIncome: 2880000000 }
+    { id: "kiosk", name: "Street Kiosk", icon: "🏪", basePrice: 15, baseIncome: 360 },
+    { id: "carwash", name: "Car Wash", icon: "🚿", basePrice: 100, baseIncome: 2880 },
+    { id: "cafe", name: "Coffee Shop", icon: "☕", basePrice: 1100, baseIncome: 28800 },
+    { id: "restaurant", name: "Restaurant", icon: "🍽️", basePrice: 12000, baseIncome: 169200 },
+    { id: "factory", name: "Factory", icon: "🏭", basePrice: 130000, baseIncome: 936000 },
+    { id: "bank", name: "Investment Bank", icon: "🏦", basePrice: 1400000, baseIncome: 5040000 },
+    { id: "it_company", name: "Tech Company", icon: "💻", basePrice: 20000000, baseIncome: 39600000 },
+    { id: "ai_corp", name: "AI Corporation", icon: "🤖", basePrice: 330000000, baseIncome: 342000000 },
+    { id: "space_company", name: "Space Ventures", icon: "🚀", basePrice: 5100000000, baseIncome: 2880000000 }
   ];
 
-  const SAVE_KEY = "shark_game_save_v6";
+  const SAVE_KEY = "shark_game_save_v7";
   const MAX_ENERGY = 1000;
 
+  // READ TELEGRAM USER DATA & AVATAR
   let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -286,7 +300,6 @@
     return idx;
   }
 
-  // КОЭФФИЦИЕНТ 1.25 ВМЕСТО 1.15 ОСТАНАВЛИВАЕТ ГИПЕРИНФЛЯЦИЮ
   function businessPrice(base, owned) { 
     return Math.floor(base * Math.pow(1.25, owned)); 
   }
@@ -370,7 +383,7 @@
   function buyBusiness(b) {
     const count = state.owned[b.id] || 0;
     const price = businessPrice(b.basePrice, count);
-    if (state.balance < price) { showToast("Не хватает средств!"); return; }
+    if (state.balance < price) { showToast("Not enough funds!"); return; }
     
     state.balance -= price;
     state.owned[b.id] = count + 1;
@@ -380,10 +393,32 @@
 
   function renderProfile() {
     const idx = getLevelIdx(state.balance);
-    $("profile-name").textContent = tgUser ? tgUser.first_name : "SHARK";
+    const firstName = tgUser ? tgUser.first_name : "SHARK";
+    const lastName = tgUser && tgUser.last_name ? " " + tgUser.last_name : "";
+    const username = tgUser && tgUser.username ? "@" + tgUser.username : "@trader";
+    const photoUrl = tgUser ? tgUser.photo_url : null;
+
+    $("profile-name").textContent = firstName + lastName;
+    $("profile-username").textContent = username;
     $("profile-level").textContent = LEVELS[idx].name.toUpperCase();
     $("profile-networth").textContent = formatMoney(state.balance) + " SP";
     $("profile-biz").textContent = Object.values(state.owned).reduce((a, b) => a + b, 0);
+
+    // AVATAR LOGIC
+    const imgEl = $("profile-avatar-img");
+    const fallbackEl = $("profile-avatar-fallback");
+
+    if (photoUrl) {
+      imgEl.src = photoUrl;
+      imgEl.style.display = "block";
+      fallbackEl.style.display = "none";
+    } else {
+      imgEl.style.display = "none";
+      fallbackEl.style.display = "flex";
+      // Generate initials
+      const initials = (firstName[0] + (lastName.trim()[0] || "")).toUpperCase();
+      fallbackEl.textContent = initials || "SK";
+    }
   }
 
   function spawnFloater(x, y, amount) {
@@ -397,7 +432,7 @@
   }
 
   function makeDeal(e) {
-    if (state.energy <= 0) { showToast("Мало энергии!"); return; }
+    if (state.energy <= 0) { showToast("Low energy!"); return; }
     
     const gain = 1 + getLevelIdx(state.balance);
     state.balance += gain;
@@ -434,7 +469,7 @@
     });
   });
 
-  // Восстановление энергии
+  // Energy regeneration
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
       state.energy = Math.min(MAX_ENERGY, state.energy + 3);
@@ -443,7 +478,7 @@
     }
   }, 1000);
 
-  // Пассивный доход в секунду
+  // Passive income generator
   setInterval(() => {
     const incomePerSec = getPassiveIncomePerHour() / 3600;
     if (incomePerSec > 0) {
