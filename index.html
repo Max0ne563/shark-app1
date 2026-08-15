@@ -6,7 +6,6 @@
 <title>SHARK — Hunt. Trade. Dominate.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<!-- Подключение Telegram WebApp SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   :root {
@@ -73,15 +72,13 @@
   .screen.active { display: block; }
   .screen::-webkit-scrollbar { display: none; }
 
-  /* HOME */
-  .home-screen.active { display: flex; flex-direction: column; }
   .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .brand { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; letter-spacing: 0.18em; color: var(--gold-bright); display: flex; align-items: center; gap: 6px; }
   .brand-mark { font-size: 11px; color: var(--gold); }
 
   .balance-block { text-align: center; margin-bottom: 16px; }
   .balance-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); margin-bottom: 4px; }
-  .balance-value { font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 700; background: linear-gradient(180deg, #ffffff, #c9d4e8); -webkit-background-clip: text; background-clip: text; color: transparent; display: block; }
+  .balance-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; background: linear-gradient(180deg, #ffffff, #c9d4e8); -webkit-background-clip: text; background-clip: text; color: transparent; display: block; }
   .income-row { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; background: rgba(61,220,151,0.08); border: 1px solid rgba(61,220,151,0.25); padding: 4px 12px; border-radius: 100px; }
   .income-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
   .income-value { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); font-weight: 600; }
@@ -101,7 +98,7 @@
 
   .shark-stage { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 190px; touch-action: none; }
   .shark-tap-btn {
-    position: relative; width: 190px; height: 190px; border-radius: 50%;
+    position: relative; width: 180px; height: 180px; border-radius: 50%;
     border: 2px solid rgba(212,175,106,0.45);
     background: radial-gradient(circle at 50% 45%, rgba(28,52,82,0.95), rgba(12,18,31,0.98) 68%);
     box-shadow: 0 0 0 8px rgba(212,175,106,0.035), 0 14px 45px rgba(0,0,0,0.5), inset 0 0 35px rgba(74,158,255,0.08);
@@ -111,9 +108,8 @@
     touch-action: manipulation;
   }
   .shark-tap-btn:active { transform: scale(0.94); border-color: rgba(240,200,128,0.8); }
-  .shark-glow { position: absolute; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(74,158,255,0.28), transparent 70%); transition: transform 0.15s ease, opacity 0.15s ease; pointer-events: none; }
-  .shark-glow.pulse { transform: scale(1.15); }
-  .shark-figure { font-size: 92px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)); transform: scaleX(-1); position: relative; z-index: 1; pointer-events: none; }
+  .shark-glow { position: absolute; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(74,158,255,0.28), transparent 70%); pointer-events: none; }
+  .shark-figure { font-size: 84px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)); transform: scaleX(-1); position: relative; z-index: 1; pointer-events: none; }
 
   .floater { position: fixed; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; color: var(--green); pointer-events: none; animation: floatUp 0.9s ease-out forwards; z-index: 50; text-shadow: 0 0 12px rgba(61,220,151,0.6); }
   @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
@@ -124,73 +120,44 @@
 
   .biz-list { display: flex; flex-direction: column; gap: 10px; }
   .biz-card { display: flex; align-items: center; gap: 12px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 12px; }
-  .biz-icon { font-size: 26px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; background: var(--bg-panel-2); border-radius: 12px; flex-shrink: 0; }
+  .biz-icon { font-size: 24px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg-panel-2); border-radius: 12px; flex-shrink: 0; }
   .biz-info { flex: 1; min-width: 0; }
   .biz-name-row { display: flex; align-items: center; gap: 6px; }
-  .biz-name { font-size: 13px; font-weight: 600; }
+  .biz-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .biz-count { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--gold); background: rgba(212,175,106,0.1); padding: 1px 6px; border-radius: 100px; }
   .biz-income { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); margin-top: 3px; }
   
   .biz-buy { 
     display: flex; flex-direction: column; align-items: center; gap: 2px; 
-    padding: 8px 14px; border-radius: 12px; 
+    padding: 8px 12px; border-radius: 12px; 
     border: 1px solid rgba(212, 175, 106, 0.4); 
     background: linear-gradient(180deg, #1f2c48, #141d30); 
-    cursor: pointer; flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    cursor: pointer; flex-shrink: 0; min-width: 85px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     transition: all 0.15s ease;
   }
   .biz-buy:active { transform: scale(0.95); }
   .biz-buy-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; color: var(--gold-bright); letter-spacing: 0.08em; }
   .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--text-primary); }
-  .biz-buy-disabled { 
-    opacity: 0.35; 
-    border-color: rgba(255, 255, 255, 0.08); 
-    background: var(--bg-panel-2); 
-    box-shadow: none;
-  }
+  .biz-buy-disabled { opacity: 0.35; border-color: rgba(255, 255, 255, 0.08); background: var(--bg-panel-2); box-shadow: none; }
 
-  .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 22px; text-align: center; margin-bottom: 18px; }
-  .profile-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 10px auto; border: 1px solid var(--border); overflow: hidden; }
+  .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 18px; }
+  .profile-avatar { width: 60px; height: 60px; border-radius: 50%; background: var(--bg-panel-2); display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 10px auto; border: 1px solid var(--border); overflow: hidden; }
   .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
   .profile-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
-  .profile-level { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); letter-spacing: 0.1em; margin-bottom: 16px; }
+  .profile-level { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-bright); letter-spacing: 0.1em; margin-bottom: 14px; }
   .profile-stats { display: flex; justify-content: space-around; }
   .profile-stat-label { font-size: 10px; color: var(--text-dim); }
-  .profile-stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 14px; margin-top: 3px; }
-
-  .ach-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 10px; }
-  .ach-list { display: flex; flex-direction: column; gap: 8px; }
-  .ach-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; border: 1px solid var(--border); }
-  .ach-unlocked { background: rgba(212,175,106,0.06); }
-  .ach-locked { background: var(--bg-panel); opacity: 0.55; }
-  .ach-icon { font-size: 20px; }
-  .ach-name { font-size: 13px; font-weight: 600; }
-  .ach-desc { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+  .profile-stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; margin-top: 3px; }
 
   .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; display: flex; background: rgba(10,15,28,0.9); backdrop-filter: blur(16px); border-top: 1px solid var(--border); padding: 8px 6px 14px 6px; }
   .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; padding: 6px 0; cursor: pointer; color: var(--text-dim); }
-  .nav-icon { font-size: 18px; opacity: 0.6; transition: opacity 0.2s; }
+  .nav-icon { font-size: 18px; opacity: 0.6; }
   .nav-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; }
   .nav-item.active { color: var(--gold-bright); }
   .nav-item.active .nav-icon { opacity: 1; filter: drop-shadow(0 0 6px rgba(212,175,106,0.6)); }
 
-  .modal-overlay { position: absolute; inset: 0; background: rgba(3,5,10,0.75); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-  .modal-overlay.active { display: flex; }
-  .modal-card { width: 100%; max-width: 320px; background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel)); border: 1px solid rgba(212,175,106,0.35); border-radius: 20px; padding: 26px 22px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-  .modal-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: var(--gold); }
-  .modal-icon { font-size: 40px; margin: 14px 0 6px 0; }
-  .modal-label { font-size: 12px; color: var(--text-dim); }
-  .modal-amount { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; color: var(--green); margin: 6px 0 20px 0; }
-  .modal-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); color: #14100a; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; cursor: pointer; }
-
-  .levelup-banner { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 200; pointer-events: none; opacity: 0; }
-  .levelup-banner.show { animation: levelPop 2.4s ease forwards; }
-  @keyframes levelPop { 0% { opacity: 0; transform: translate(-50%, -40%) scale(0.7); } 15% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } 25% { transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -55%) scale(1); } }
-  .levelup-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.3em; color: var(--gold); }
-  .levelup-name { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; color: var(--gold-bright); text-shadow: 0 0 30px rgba(212,175,106,0.6); margin-top: 4px; }
-
-  .toast { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(15,22,38,0.95); border: 1px solid var(--border); color: var(--text-primary); font-size: 12px; padding: 10px 18px; border-radius: 100px; z-index: 150; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .toast { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(15,22,38,0.95); border: 1px solid var(--border); color: var(--text-primary); font-size: 12px; padding: 10px 18px; border-radius: 100px; z-index: 150; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
   .toast.show { opacity: 1; }
 </style>
 </head>
@@ -224,8 +191,8 @@
       <span class="energy-text mono" id="energy-text">1000/1000</span>
     </div>
     <div class="shark-stage">
-      <button class="shark-tap-btn" id="shark-tap-btn" aria-label="Tap shark">
-        <div class="shark-glow" id="shark-glow"></div>
+      <button class="shark-tap-btn" id="shark-tap-btn">
+        <div class="shark-glow"></div>
         <div class="shark-figure">🦈</div>
       </button>
     </div>
@@ -248,14 +215,9 @@
       <div class="profile-name" id="profile-name">SHARK</div>
       <div class="profile-level mono" id="profile-level">ROOKIE</div>
       <div class="profile-stats">
-        <div class="profile-stat"><div class="profile-stat-label">Net Worth</div><div class="profile-stat-value mono" id="profile-networth">$0</div></div>
+        <div class="profile-stat"><div class="profile-stat-label">Net Worth</div><div class="profile-stat-value mono" id="profile-networth">0 SP</div></div>
         <div class="profile-stat"><div class="profile-stat-label">Businesses</div><div class="profile-stat-value mono" id="profile-biz">0</div></div>
-        <div class="profile-stat"><div class="profile-stat-label">Rank</div><div class="profile-stat-value mono" id="profile-rank">#...</div></div>
       </div>
-    </div>
-    <div class="ach-section">
-      <div class="ach-title mono">Achievements</div>
-      <div class="ach-list" id="ach-list"></div>
     </div>
   </div>
 
@@ -265,22 +227,6 @@
     <button class="nav-item" data-tab="profile"><span class="nav-icon">👤</span><span class="nav-label mono">Profile</span></button>
   </div>
 
-  <!-- Welcome back modal -->
-  <div class="modal-overlay" id="welcome-modal">
-    <div class="modal-card">
-      <div class="modal-eyebrow mono">WELCOME BACK</div>
-      <div class="modal-icon">💰</div>
-      <div class="modal-label">You earned</div>
-      <div class="modal-amount mono" id="welcome-amount">+0 SP</div>
-      <button class="modal-btn mono" id="welcome-close-btn">COLLECT</button>
-    </div>
-  </div>
-
-  <div class="levelup-banner" id="levelup-banner">
-    <div class="levelup-eyebrow mono">LEVEL UP</div>
-    <div class="levelup-name mono" id="levelup-name">TRADER</div>
-  </div>
-
   <div class="toast mono" id="toast"></div>
 </div>
 
@@ -288,42 +234,32 @@
 (function () {
   "use strict";
 
-  document.addEventListener('gesturestart', function (e) {
-    e.preventDefault();
-  });
-
-  // ИСПРАВЛЕННЫЕ И ОБЛЕГЧЕННЫЕ ПОРОГИ УРОВНЕЙ
+  // ЖЕСТКИЙ БАЛАНС С БОЛЬШИМИ ПОРОГАМИ UПРАВЛЕНИЯ ИНФЛЯЦИЕЙ
   const LEVELS = [
-    { name: "Rookie", threshold: 0, incomeMult: 1 },
-    { name: "Trader", threshold: 200, incomeMult: 1.2 },       // Достигается очень быстро!
-    { name: "Broker", threshold: 2500, incomeMult: 1.5 },
-    { name: "Investor", threshold: 25000, incomeMult: 2.0 },
-    { name: "Banker", threshold: 250000, incomeMult: 2.5 },
-    { name: "CEO", threshold: 2500000, incomeMult: 3.5 },
-    { name: "Tycoon", threshold: 25000000, incomeMult: 5.0 },
-    { name: "Shark Lord", threshold: 100000000, incomeMult: 8.0 },
+    { name: "Rookie", threshold: 0, incomeMult: 1.0 },
+    { name: "Trader", threshold: 1000, incomeMult: 1.1 },
+    { name: "Broker", threshold: 50000, incomeMult: 1.25 },
+    { name: "Investor", threshold: 1000000, incomeMult: 1.5 },       // 1M
+    { name: "Banker", threshold: 25000000, incomeMult: 2.0 },        // 25M
+    { name: "CEO", threshold: 500000000, incomeMult: 3.0 },           // 500M
+    { name: "Tycoon", threshold: 10000000000, incomeMult: 5.0 },     // 10B
+    { name: "Shark Lord", threshold: 250000000000, incomeMult: 10.0 } // 250B
   ];
 
-  // ИСПРАВЛЕННЫЕ И БОЛЕЕ ДОСТУПНЫЕ ЦЕНЫ БИЗНЕСОВ
+  // СБАЛАНСИРОВАННЫЕ БИЗНЕСЫ
   const BUSINESS_DATA = [
-    { id: "office", name: "Small Office", icon: "🏢", basePrice: 50, baseIncome: 30 },
-    { id: "brokerage", name: "Brokerage", icon: "📊", basePrice: 500, baseIncome: 350 },
-    { id: "bank", name: "Bank", icon: "🏦", basePrice: 5000, baseIncome: 4000 },
-    { id: "tech", name: "Tech Company", icon: "💻", basePrice: 50000, baseIncome: 45000 },
-    { id: "ai", name: "AI Corporation", icon: "🤖", basePrice: 500000, baseIncome: 500000 },
-    { id: "space", name: "Space Company", icon: "🚀", basePrice: 10000000, baseIncome: 8000000 },
+    { id: "kiosk", name: "Киоск", icon: "🏪", basePrice: 15, baseIncome: 360 }, // 0.1/сек -> 360/час
+    { id: "carwash", name: "Автомойка", icon: "🚿", basePrice: 100, baseIncome: 2880 },
+    { id: "cafe", name: "Кафе", icon: "☕", basePrice: 1100, baseIncome: 28800 },
+    { id: "restaurant", name: "Ресторан", icon: "🍽️", basePrice: 12000, baseIncome: 169200 },
+    { id: "factory", name: "Завод", icon: "🏭", basePrice: 130000, baseIncome: 936000 },
+    { id: "bank", name: "Банк", icon: "🏦", basePrice: 1400000, baseIncome: 5040000 },
+    { id: "it_company", name: "IT-Компания", icon: "💻", basePrice: 20000000, baseIncome: 39600000 },
+    { id: "ai_corp", name: "AI Корпорация", icon: "🤖", basePrice: 330000000, baseIncome: 342000000 },
+    { id: "space_company", name: "Космос", icon: "🚀", basePrice: 5100000000, baseIncome: 2880000000 }
   ];
 
-  const ACHIEVEMENTS = [
-    { id: "first", name: "First Deal", desc: "Make your first deal.", check: s => s.deals >= 1 },
-    { id: "starter", name: "Fast Start", desc: "Reach $200 SP.", check: s => s.balance >= 200 },
-    { id: "first_biz", name: "First Office", desc: "Acquire your first business.", check: s => (s.owned.office || 0) >= 1 },
-    { id: "capitalist", name: "Capitalist", desc: "Reach $10,000 SP.", check: s => s.balance >= 10000 },
-    { id: "mogul", name: "Business Mogul", desc: "Own 5 total businesses.", check: s => Object.values(s.owned).reduce((a, b) => a + b, 0) >= 5 },
-    { id: "shark_titan", name: "Shark Titan", desc: "Reach $1,000,000 SP.", check: s => s.balance >= 1000000 },
-  ];
-
-  const SAVE_KEY = "shark_game_save_v5";
+  const SAVE_KEY = "shark_game_save_v6";
   const MAX_ENERGY = 1000;
 
   let tgUser = null;
@@ -337,94 +273,45 @@
   }
 
   function formatMoney(n) {
+    if (n >= 1e12) return (n / 1e12).toFixed(2) + "T";
     if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
     if (n >= 1e6) return (n / 1e6).toFixed(2) + "M";
     if (n >= 1e3) return (n / 1e3).toFixed(1) + "K";
     return Math.floor(n).toLocaleString();
   }
-  function formatFull(n) { return Math.floor(n).toLocaleString("en-US"); }
+
   function getLevelIdx(balance) {
     let idx = 0;
     for (let i = 0; i < LEVELS.length; i++) if (balance >= LEVELS[i].threshold) idx = i;
     return idx;
   }
-  function businessPrice(base, owned) { return Math.floor(base * Math.pow(1.15, owned)); }
-  function businessIncome(base, owned) { return Math.floor(base * owned); }
 
-  const ADMIN_USERNAME = "wertycoco";
-
-  function generateRandomRank() {
-    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
-      return 1;
-    }
-    return Math.floor(Math.random() * (10000 - 2 + 1)) + 2;
+  // КОЭФФИЦИЕНТ 1.25 ВМЕСТО 1.15 ОСТАНАВЛИВАЕТ ГИПЕРИНФЛЯЦИЮ
+  function businessPrice(base, owned) { 
+    return Math.floor(base * Math.pow(1.25, owned)); 
   }
 
-  const PROFILE_VERSION = 5;
   let state = loadState();
 
   function loadState() {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
-      if (raw) {
-        const s = JSON.parse(raw);
-        if (s.profileVersion !== PROFILE_VERSION) {
-          localStorage.removeItem(SAVE_KEY);
-          return createDefaultState();
-        }
-        return {
-          profileVersion: PROFILE_VERSION,
-          userRank: s.userRank ?? generateRandomRank(),
-          balance: s.balance ?? 0,
-          energy: s.energy ?? MAX_ENERGY,
-          deals: s.deals ?? 0,
-          owned: s.owned ?? {},
-          unlockedAch: s.unlockedAch ?? {},
-          lastActive: s.lastActive ?? Date.now(),
-        };
-      }
+      if (raw) return JSON.parse(raw);
     } catch (e) {}
-    return createDefaultState();
-  }
-
-  function createDefaultState() {
-    return {
-      profileVersion: PROFILE_VERSION,
-      userRank: generateRandomRank(),
-      balance: 0,
-      energy: MAX_ENERGY,
-      deals: 0,
-      owned: {},
-      unlockedAch: {},
-      lastActive: Date.now() - 1000 * 60 * 62,
-    };
+    return { balance: 0, energy: MAX_ENERGY, owned: {} };
   }
 
   function saveState() {
-    state.profileVersion = PROFILE_VERSION;
-    state.lastActive = Date.now();
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   }
 
-  function getPassiveIncome() {
-    const base = BUSINESS_DATA.reduce((sum, b) => sum + businessIncome(b.baseIncome, state.owned[b.id] || 0), 0);
+  function getPassiveIncomePerHour() {
+    const base = BUSINESS_DATA.reduce((sum, b) => sum + (b.baseIncome * (state.owned[b.id] || 0)), 0);
     return base * LEVELS[getLevelIdx(state.balance)].incomeMult;
   }
 
   const $ = id => document.getElementById(id);
-  const balanceEl = $("balance-value");
-  const incomeEl = $("income-value");
-  const levelNameEl = $("level-name");
-  const levelNextEl = $("level-next");
-  const progressFillEl = $("progress-fill");
-  const energyFillEl = $("energy-fill");
-  const energyTextEl = $("energy-text");
-  const sharkTapBtn = $("shark-tap-btn");
-  const sharkGlow = $("shark-glow");
   const toastEl = $("toast");
-
-  let displayedBalance = state.balance;
-  let prevLevelIdx = getLevelIdx(state.balance);
 
   function showToast(msg) {
     toastEl.textContent = msg;
@@ -433,48 +320,22 @@
     showToast._t = setTimeout(() => toastEl.classList.remove("show"), 1600);
   }
 
-  function animateBalanceTo(target) {
-    const start = displayedBalance;
-    const startTime = performance.now();
-    const duration = 300;
-    function step(now) {
-      const t = Math.min(1, (now - startTime) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      displayedBalance = start + (target - start) * eased;
-      balanceEl.textContent = formatFull(displayedBalance) + " SP";
-      if (t < 1) requestAnimationFrame(step);
-      else displayedBalance = target;
-    }
-    requestAnimationFrame(step);
-  }
-
   function renderHome() {
-    animateBalanceTo(state.balance);
-    incomeEl.textContent = "+" + formatMoney(getPassiveIncome()) + " SP / hour";
+    $("balance-value").textContent = formatMoney(state.balance) + " SP";
+    $("income-value").textContent = "+" + formatMoney(getPassiveIncomePerHour()) + " SP / hour";
+    
     const idx = getLevelIdx(state.balance);
     const level = LEVELS[idx];
     const next = LEVELS[idx + 1];
-    levelNameEl.textContent = level.name.toUpperCase();
-    levelNextEl.textContent = next ? "NEXT: " + next.name.toUpperCase() : "MAX LEVEL";
-    const progress = next ? ((state.balance - level.threshold) / (next.threshold - level.threshold)) * 100 : 100;
-    progressFillEl.style.width = Math.min(100, progress) + "%";
     
-    const energyPct = (state.energy / MAX_ENERGY) * 100;
-    energyFillEl.style.width = energyPct + "%";
-    energyTextEl.textContent = state.energy + "/" + MAX_ENERGY;
-
-    if (idx > prevLevelIdx) {
-      prevLevelIdx = idx;
-      showLevelUp(level.name);
-    }
-  }
-
-  function showLevelUp(name) {
-    const banner = $("levelup-banner");
-    $("levelup-name").textContent = name.toUpperCase();
-    banner.classList.remove("show");
-    void banner.offsetWidth;
-    banner.classList.add("show");
+    $("level-name").textContent = level.name.toUpperCase();
+    $("level-next").textContent = next ? "NEXT: " + next.name.toUpperCase() : "MAX LEVEL";
+    
+    const progress = next ? ((state.balance - level.threshold) / (next.threshold - level.threshold)) * 100 : 100;
+    $("progress-fill").style.width = Math.min(100, Math.max(0, progress)) + "%";
+    
+    $("energy-fill").style.width = (state.energy / MAX_ENERGY * 100) + "%";
+    $("energy-text").textContent = state.energy + "/" + MAX_ENERGY;
   }
 
   function renderBusiness() {
@@ -483,10 +344,7 @@
     BUSINESS_DATA.forEach(b => {
       const count = state.owned[b.id] || 0;
       const price = businessPrice(b.basePrice, count);
-      const income = businessIncome(b.baseIncome, count);
       const affordable = state.balance >= price;
-      
-      const displayIncome = count > 0 ? income : b.baseIncome;
 
       const card = document.createElement("div");
       card.className = "biz-card";
@@ -497,11 +355,11 @@
             <span class="biz-name">${b.name}</span>
             ${count > 0 ? `<span class="biz-count mono">×${count}</span>` : ""}
           </div>
-          <div class="biz-income mono">+${formatMoney(displayIncome)} SP / hour</div>
+          <div class="biz-income mono">+${formatMoney(b.baseIncome)} SP/h</div>
         </div>
         <button class="biz-buy ${affordable ? "" : "biz-buy-disabled"}">
           <span class="biz-buy-label mono">${count > 0 ? "UPGRADE" : "BUY"}</span>
-          <span class="biz-buy-price mono">${formatMoney(price)} SP</span>
+          <span class="biz-buy-price mono">${formatMoney(price)}</span>
         </button>
       `;
       card.querySelector(".biz-buy").addEventListener("click", () => buyBusiness(b));
@@ -512,68 +370,20 @@
   function buyBusiness(b) {
     const count = state.owned[b.id] || 0;
     const price = businessPrice(b.basePrice, count);
-    if (state.balance < price) { showToast("Not enough cash"); return; }
+    if (state.balance < price) { showToast("Не хватает средств!"); return; }
+    
     state.balance -= price;
     state.owned[b.id] = count + 1;
-    showToast(b.name + " acquired");
     saveState();
-    renderHome(); renderBusiness(); renderProfile(); checkAchievements();
+    renderHome(); renderBusiness(); renderProfile();
   }
 
   function renderProfile() {
     const idx = getLevelIdx(state.balance);
-    
-    let displayName = "SHARK";
-    if (tgUser) {
-      displayName = tgUser.first_name + (tgUser.last_name ? " " + tgUser.last_name : "");
-    }
-    
-    $("profile-name").textContent = displayName;
+    $("profile-name").textContent = tgUser ? tgUser.first_name : "SHARK";
     $("profile-level").textContent = LEVELS[idx].name.toUpperCase();
     $("profile-networth").textContent = formatMoney(state.balance) + " SP";
-    const total = Object.values(state.owned).reduce((a, b) => a + b, 0);
-    $("profile-biz").textContent = total;
-    
-    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
-      state.userRank = 1;
-    }
-    
-    $("profile-rank").textContent = "#" + state.userRank.toLocaleString();
-
-    const avatarEl = $("profile-avatar");
-    if (tgUser && tgUser.photo_url) {
-      avatarEl.innerHTML = `<img src="${tgUser.photo_url}" alt="Avatar">`;
-    } else if (tgUser && tgUser.first_name) {
-      avatarEl.textContent = tgUser.first_name.charAt(0).toUpperCase();
-    } else {
-      avatarEl.textContent = "🦈";
-    }
-
-    const list = $("ach-list");
-    list.innerHTML = "";
-    ACHIEVEMENTS.forEach(a => {
-      const unlocked = !!state.unlockedAch[a.id];
-      const card = document.createElement("div");
-      card.className = "ach-card " + (unlocked ? "ach-unlocked" : "ach-locked");
-      card.innerHTML = `
-        <div class="ach-icon">${unlocked ? "🏆" : "🔒"}</div>
-        <div>
-          <div class="ach-name">${a.name}</div>
-          <div class="ach-desc">${a.desc}</div>
-        </div>
-      `;
-      list.appendChild(card);
-    });
-  }
-
-  function checkAchievements() {
-    ACHIEVEMENTS.forEach(a => {
-      if (a.check(state) && !state.unlockedAch[a.id]) {
-        state.unlockedAch[a.id] = true;
-        showToast("Achievement unlocked: " + a.name);
-        saveState();
-      }
-    });
+    $("profile-biz").textContent = Object.values(state.owned).reduce((a, b) => a + b, 0);
   }
 
   function spawnFloater(x, y, amount) {
@@ -581,54 +391,37 @@
     el.className = "floater";
     el.style.left = (x - 20) + "px";
     el.style.top = (y - 20) + "px";
-    el.textContent = "+" + amount.toLocaleString() + " SP";
+    el.textContent = "+" + amount + " SP";
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 900);
   }
 
   function makeDeal(e) {
-    if (state.energy <= 0) { showToast("Not enough energy"); return; }
+    if (state.energy <= 0) { showToast("Мало энергии!"); return; }
     
-    const levelIdx = getLevelIdx(state.balance);
-    // ИСПРАВЛЕННАЯ ФОРМУЛА ТАПА: Базовый тап дает 5 SP + прогрессирует от уровня и пассивного дохода
-    const levelBonus = (levelIdx + 1) * 4;
-    const passiveBonus = Math.floor(getPassiveIncome() * 0.002);
-    
-    const gain = 5 + levelBonus + passiveBonus;
-    
+    const gain = 1 + getLevelIdx(state.balance);
     state.balance += gain;
     state.energy = Math.max(0, state.energy - 1);
-    state.deals += 1;
     saveState();
 
-    const rect = sharkTapBtn.getBoundingClientRect();
-    const x = e && e.clientX ? e.clientX : (e && e.touches ? e.touches[0].clientX : rect.left + rect.width / 2);
-    const y = e && e.clientY ? e.clientY : (e && e.touches ? e.touches[0].clientY : rect.top);
+    const rect = $("shark-tap-btn").getBoundingClientRect();
+    const x = e && e.clientX ? e.clientX : rect.left + rect.width / 2;
+    const y = e && e.clientY ? e.clientY : rect.top;
     spawnFloater(x, y, gain);
 
     if (window.Telegram?.WebApp?.HapticFeedback) {
       window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
-    } else if (window.navigator?.vibrate) {
-      window.navigator.vibrate(8);
     }
 
-    renderHome();
-    renderBusiness();
-    renderProfile();
-    checkAchievements();
+    renderHome(); renderBusiness(); renderProfile();
   }
 
-  sharkTapBtn.addEventListener("mousedown", () => sharkGlow.classList.add("pulse"));
-  sharkTapBtn.addEventListener("mouseup", () => sharkGlow.classList.remove("pulse"));
-  sharkTapBtn.addEventListener("mouseleave", () => sharkGlow.classList.remove("pulse"));
-  sharkTapBtn.addEventListener("touchstart", (e) => {
+  $("shark-tap-btn").addEventListener("touchstart", (e) => {
     e.preventDefault();
-    sharkGlow.classList.add("pulse");
     makeDeal(e);
   }, { passive: false });
   
-  sharkTapBtn.addEventListener("touchend", () => sharkGlow.classList.remove("pulse"));
-  sharkTapBtn.addEventListener("click", (e) => {
+  $("shark-tap-btn").addEventListener("click", (e) => {
     if (e.detail !== 0) makeDeal(e);
   });
 
@@ -641,42 +434,28 @@
     });
   });
 
+  // Восстановление энергии
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
-      state.energy = Math.min(MAX_ENERGY, state.energy + 5);
+      state.energy = Math.min(MAX_ENERGY, state.energy + 3);
       saveState();
       renderHome();
     }
   }, 1000);
 
+  // Пассивный доход в секунду
   setInterval(() => {
-    state.balance += getPassiveIncome() / 3600;
-    saveState();
-    renderHome();
-    renderBusiness();
-    renderProfile();
-    checkAchievements();
-  }, 1000);
-
-  const welcomeModal = $("welcome-modal");
-  welcomeModal.addEventListener("click", (e) => { if (e.target === welcomeModal) welcomeModal.classList.remove("active"); });
-  $("welcome-close-btn").addEventListener("click", () => welcomeModal.classList.remove("active"));
-
-  function checkWelcomeBack() {
-    const hoursAway = (Date.now() - (state.lastActive || Date.now())) / 1000 / 3600;
-    const earned = Math.floor(getPassiveIncome() * hoursAway);
-    if (earned > 5) {
-      state.balance += earned;
+    const incomePerSec = getPassiveIncomePerHour() / 3600;
+    if (incomePerSec > 0) {
+      state.balance += incomePerSec;
       saveState();
-      $("welcome-amount").textContent = "+" + formatMoney(earned) + " SP";
-      setTimeout(() => welcomeModal.classList.add("active"), 500);
+      renderHome();
     }
-  }
+  }, 1000);
 
   renderHome();
   renderBusiness();
   renderProfile();
-  checkWelcomeBack();
 })();
 </script>
 </body>
