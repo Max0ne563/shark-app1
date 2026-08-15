@@ -111,8 +111,22 @@
   .shark-glow { position: absolute; width: 140px; height: 140px; border-radius: 50%; background: radial-gradient(circle, rgba(74,158,255,0.28), transparent 70%); pointer-events: none; }
   .shark-figure { font-size: 84px; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6)); transform: scaleX(-1); position: relative; z-index: 1; pointer-events: none; }
 
-  .floater { position: fixed; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 16px; color: var(--green); pointer-events: none; animation: floatUp 0.9s ease-out forwards; z-index: 50; text-shadow: 0 0 12px rgba(61,220,151,0.6); }
-  @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
+  .floater { 
+    position: fixed; 
+    font-family: 'JetBrains Mono', monospace; 
+    font-weight: 700; 
+    font-size: 18px; 
+    color: var(--green); 
+    pointer-events: none; 
+    animation: floatUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards; 
+    z-index: 999; 
+    text-shadow: 0 0 12px rgba(61,220,151,0.6);
+    transform: translate(-50%, -50%);
+  }
+  @keyframes floatUp { 
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; } 
+    100% { transform: translate(-50%, -120px) scale(1.1); opacity: 0; } 
+  }
 
   .screen-header { margin-bottom: 16px; }
   .screen-title { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; }
@@ -141,7 +155,6 @@
   .biz-buy-price { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--text-primary); }
   .biz-buy-disabled { opacity: 0.35; border-color: rgba(255, 255, 255, 0.08); background: var(--bg-panel-2); box-shadow: none; }
 
-  /* PROFILE STYLES WITH AVATAR SUPPORT */
   .profile-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 18px; padding: 20px; text-align: center; margin-bottom: 18px; }
   .profile-avatar-wrapper { width: 68px; height: 68px; margin: 0 auto 12px auto; position: relative; }
   .profile-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); box-shadow: 0 0 16px rgba(212,175,106,0.25); display: none; }
@@ -259,7 +272,6 @@
     { name: "Shark Lord", threshold: 250000000000, incomeMult: 10.0 }
   ];
 
-  // ALL BUSINESSES IN ENGLISH
   const BUSINESS_DATA = [
     { id: "kiosk", name: "Street Kiosk", icon: "🏪", basePrice: 15, baseIncome: 360 },
     { id: "carwash", name: "Car Wash", icon: "🚿", basePrice: 100, baseIncome: 2880 },
@@ -275,7 +287,6 @@
   const SAVE_KEY = "shark_game_save_v7";
   const MAX_ENERGY = 1000;
 
-  // READ TELEGRAM USER DATA & AVATAR
   let tgUser = null;
   if (window.Telegram && window.Telegram.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -404,7 +415,6 @@
     $("profile-networth").textContent = formatMoney(state.balance) + " SP";
     $("profile-biz").textContent = Object.values(state.owned).reduce((a, b) => a + b, 0);
 
-    // AVATAR LOGIC
     const imgEl = $("profile-avatar-img");
     const fallbackEl = $("profile-avatar-fallback");
 
@@ -415,7 +425,6 @@
     } else {
       imgEl.style.display = "none";
       fallbackEl.style.display = "flex";
-      // Generate initials
       const initials = (firstName[0] + (lastName.trim()[0] || "")).toUpperCase();
       fallbackEl.textContent = initials || "SK";
     }
@@ -424,14 +433,14 @@
   function spawnFloater(x, y, amount) {
     const el = document.createElement("div");
     el.className = "floater";
-    el.style.left = (x - 20) + "px";
-    el.style.top = (y - 20) + "px";
+    el.style.left = x + "px";
+    el.style.top = y + "px";
     el.textContent = "+" + amount + " SP";
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 900);
+    setTimeout(() => el.remove(), 800);
   }
 
-  function makeDeal(e) {
+  function makeDeal(x, y) {
     if (state.energy <= 0) { showToast("Low energy!"); return; }
     
     const gain = 1 + getLevelIdx(state.balance);
@@ -439,9 +448,6 @@
     state.energy = Math.max(0, state.energy - 1);
     saveState();
 
-    const rect = $("shark-tap-btn").getBoundingClientRect();
-    const x = e && e.clientX ? e.clientX : rect.left + rect.width / 2;
-    const y = e && e.clientY ? e.clientY : rect.top;
     spawnFloater(x, y, gain);
 
     if (window.Telegram?.WebApp?.HapticFeedback) {
@@ -451,13 +457,20 @@
     renderHome(); renderBusiness(); renderProfile();
   }
 
-  $("shark-tap-btn").addEventListener("touchstart", (e) => {
+  const tapBtn = $("shark-tap-btn");
+
+  tapBtn.addEventListener("touchstart", (e) => {
     e.preventDefault();
-    makeDeal(e);
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      makeDeal(touch.clientX, touch.clientY);
+    }
   }, { passive: false });
   
-  $("shark-tap-btn").addEventListener("click", (e) => {
-    if (e.detail !== 0) makeDeal(e);
+  tapBtn.addEventListener("click", (e) => {
+    if (e.detail !== 0) {
+      makeDeal(e.clientX, e.clientY);
+    }
   });
 
   document.querySelectorAll(".nav-item").forEach(btn => {
@@ -469,7 +482,6 @@
     });
   });
 
-  // Energy regeneration
   setInterval(() => {
     if (state.energy < MAX_ENERGY) {
       state.energy = Math.min(MAX_ENERGY, state.energy + 3);
@@ -478,7 +490,6 @@
     }
   }, 1000);
 
-  // Passive income generator
   setInterval(() => {
     const incomePerSec = getPassiveIncomePerHour() / 3600;
     if (incomePerSec > 0) {
